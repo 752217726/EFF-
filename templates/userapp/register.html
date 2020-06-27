@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+    {% load static %}
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>EFF超市管理系统-注册</title>
+	<link rel="stylesheet" type="text/css" href="/static/css/reset.css">
+	<link rel="stylesheet" type="text/css" href="/static/css/main.css">
+	<script type="text/javascript" src="/static/js/jquery-1.12.4.min.js"></script>
+	<script type="text/javascript" src="/static/js/register.js"></script>
+</head>
+<body>
+	<div class="register_con">
+		<div class="l_con fl">
+			<a class="reg_logo"><img src="/static/images/EFF-logo.jpg" width="230px" height="90px"></a>
+			<div class="reg_slogan">美好生活，乐享乐购。</div>
+		</div>
+
+		<div class="r_con fr">
+			<div class="reg_title clearfix">
+				<h1>用户注册</h1>
+				<a href="{% url 'userapp:login' %}">登录</a>
+			</div>
+			<div class="reg_form clearfix">
+				<form action="{% url 'userapp:registerlogic' %}" method="post">
+                    {% csrf_token %}
+				<ul>
+					<li>
+						<label>用户名:</label>
+						<input type="text" name="user_name" id="user_name" placeholder="请输入真实姓名" onblur="checkname()">
+                        <a href=""></a><span></span>
+						<span class="error_tip">提示信息</span>
+					</li>					
+					<li>
+						<label>密码:</label>
+						<input type="password" name="pwd" id="pwd" placeholder="请输入密码">
+						<span class="error_tip">提示信息</span>
+					</li>
+					<li>
+						<label>确认密码:</label>
+						<input type="password" name="cpwd" id="cpwd" placeholder="请输入确认密码">
+						<span class="error_tip">提示信息</span>
+					</li>
+					<li>
+						<label>邮箱:</label>
+						<input type="text" name="email" id="email" placeholder="请输入邮箱">
+						<span class="error_tip">提示信息</span>
+					</li>
+					<li>
+                        <label>验证码:</label>
+                        <input type="text" name="captcha" id="captcha" onblur="check()" style="width: 100px;">
+                        <img src="{% url 'userapp:setimg' %}" alt="" width="80">
+                        <a href="javascript:void(0);" style="text-decoration: underline;">看不清，换一张</a><span></span>
+                        <span class="error_tip" id="tip_captcha">提示信息</span>
+                    </li>
+					<li class="agreement">
+						<input type="checkbox" name="allow" id="allow" checked="checked">
+						<label>同意”EFF超市管理系统使用协议“</label>
+						<span class="error_tip2">提示信息</span>
+					</li>
+					<li class="reg_sub">
+						<input type="button" value="注 册" name="" onclick="submit_form()">
+					</li>
+				</ul>				
+				</form>
+			</div>
+
+		</div>
+
+	</div>
+
+	<div class="footer no-mp">
+		<div class="foot_link">
+			<a href="http://www.baidu.com">关于我们</a>
+			<span>|</span>
+			<a href="http://www.baidu.com">联系我们</a>
+			<span>|</span>
+			<a href="http://www.baidu.com">招聘人才</a>
+			<span>|</span>
+			<a href="http://www.baidu.com">友情链接</a>
+		</div>
+		<p>CopyRight © 2020 上知天文下知科技有限公司 All Rights Reserved</p>
+		<p>电话：010-****888    豫ICP备*******8号</p>
+	</div>
+    <script src="{% static 'js/jquery-1.12.4.min.js' %}"></script>
+    <script>
+        function check() {
+         //发送ajax请求 get请求
+        //1.创建核心工作对象
+            var xhr = null;
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {
+                xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            }
+            //2.发送请求前 配置工作
+            // url + 拼接参数  ?键值对
+            var inp=document.getElementsByName('captcha')[0].value;
+            var url='{% url 'userapp:captchlogic' %}?val='+inp;
+            xhr.open('get',url);
+            //3. 发送请求
+            xhr.send();
+            //验证码验证过程中 显示loading效果
+            //4.服务器进行业务处理 是否处理完毕，客户端是否可接收
+            //通过事件去监听
+            xhr.onreadystatechange = function () {
+                //console.log(xhr.readyState);
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.responseText);
+                    var res = xhr.responseText;
+                    var sp = document.getElementsByTagName('span')[5];
+                    //sp.innerHTML = xhr.responseText;
+                    if (res === '验证成功') {
+                        //显示在span内图片
+                        sp.innerHTML = "<img src='{% static "images/right.jpg" %}' style='width:20px' />";
+                    }
+                    else {
+                        sp.innerHTML = "<img src='{% static "images/error_3.jpg" %}' style='width:20px' />";
+                    }
+                }
+            }
+        }
+        var a=document.getElementsByTagName('a')[3];
+        a.onclick=function () {
+            var img=document.getElementsByTagName('img')[1];
+            img.src='{% url 'userapp:setimg' %}?time='+new Date().getTime();
+        };
+         function submit_form() {
+             $.ajax({
+                 type:'post',
+                 url:'{% url 'userapp:registerlogic' %}',
+                 data:$('form').serialize(),
+                 success:function (data) {
+                     if (data.status ===1){
+                         alert(data.msg);
+                         location.href="{% url 'userapp:login' %}";
+                     }else {
+                         alert(data.msg);
+                     }
+                 }
+             });
+         }
+         function checkname(){
+            //发送ajax请求 get请求
+            //1.创建核心工作对象
+            var xhr = null;
+            if (window.XMLHttpRequest) {
+                xhr = new XMLHttpRequest();
+            } else if (window.ActiveXObject) {
+                xhr = new ActiveXObject('Microsoft.XMLHTTP');
+            }
+            //2.发送请求前 配置工作
+            //url 单独书写，传送参数单独发送
+            var url = '{% url "userapp:checkname" %}';
+            xhr.open('POST',url);
+            //3.发送请求 send() 参数 需要发送给服务器数据
+            //send(string) 键值对形式
+            //发送请求之前，设置请求头 模拟表单
+            xhr.setRequestHeader('Content-type','application/x-www-form-urlencoded');
+             // 获取当前输入框内的值
+            var val=document.getElementsByName('user_name')[0].value;
+            //设置 csrftoken令牌
+            xhr.send('name=' + val + '&csrfmiddlewaretoken={{ csrf_token }}');
+            //4。服务器处理请求 前端接收响应
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    console.log(xhr.responseText);
+                    var res = xhr.responseText;
+                    var sp = document.getElementsByTagName('span')[0];
+                    if (res === 'ok') {
+                        //显示在span内图片
+                        sp.innerHTML = "恭喜用户名可以使用";
+                    }
+                    else {
+                        sp.innerHTML = "用户名重复，不可使用";
+                    }
+                }
+            }
+         }
+    </script>
+</body>
+</html>
